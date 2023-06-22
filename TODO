@@ -1,0 +1,11 @@
+0. category
+1. product (price, name, brand, description, spec) images minio orqali
+2. jwt + drf_yasg
+
+3. price, name, brand filter
+4. name, brand, description search (DSL elastic search)
+5. like, cart
+6. view history
+7. test
+
+permission (Moderator)
