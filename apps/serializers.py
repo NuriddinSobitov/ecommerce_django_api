@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, ListSerializer
 
 from apps.documents import ProductDocument
-from apps.models import Category, Product, ProductImage, Cart, Brand
+from apps.models import Category, Product, ProductImage, Cart, Brand, ProductModelHistory
 
 
 class DynamicFieldsModelSerializer(ModelSerializer):
@@ -74,3 +74,9 @@ class ProductDocumentSerializer(DocumentSerializer):
     class Meta:
         document = ProductDocument
         fields = ('id', 'title', 'description')
+
+
+class ProductModelHistorySerializer(ModelSerializer):
+    class Meta:
+        model = ProductModelHistory
+        fields = '__all__'

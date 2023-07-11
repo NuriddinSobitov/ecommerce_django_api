@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  web_service:
+    build: .
+    command: gunicorn root.wsgi:application --bind 0.0.0.0:8077
+    ports:
+      - 8077:8077
+    env_file:
+      - .env
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - db_service
+
+  db_service:
+    image: postgres:15.3-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=1
+      - POSTGRES_DB=p8_db
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web_service
+    logging:
+        options:
+            max-size: "10m"
+            max-file: "3"
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+#    command: certonly --webroot -w /var/www/certbot/ --register-unsafely-without-email --dry-run -d xolmomin.diordev.me
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

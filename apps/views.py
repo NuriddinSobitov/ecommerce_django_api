@@ -11,13 +11,13 @@ from rest_framework.generics import ListCreateAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from apps.documents import ProductDocument
-
-from apps.models import Product, ProductImage, Category, Favourite
+from apps.models import Product, ProductImage, Category, Favourite, ProductModelHistory
 from apps.serializers import CategoryModelSerializer, CreateProductModelSerializer, ListProductModelSerializer, \
-    ProductDocumentSerializer
+    ProductDocumentSerializer, ProductModelHistorySerializer
 
 images_params = openapi.Parameter('images', openapi.IN_FORM, description="test manual param", type=openapi.TYPE_ARRAY,
                                   items=openapi.Items(type=openapi.TYPE_FILE), required=True)
@@ -30,6 +30,7 @@ class ProductModelViewSet(ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ('title', 'brand', 'description')
+
     # filterset_class = CustomProductFilter
 
     def get_serializer_class(self):
@@ -61,12 +62,14 @@ class ProductModelViewSet(ModelViewSet):
         instance.view_count += 1
         instance.save()
         data = self.get_serializer(instance).data
+        ProductModelHistory.objects.update_or_create(product_id=kwargs.get('pk'), user=request.user)
         return Response(data)
 
 
 class CategoryAPIView(ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryModelSerializer
+
 
 # [{ "SSD": "512", "RAM": "16" }]
 
@@ -87,3 +90,13 @@ class ProductDocumentView(DocumentViewSet):
             ],
         },
     }
+
+
+#
+class ProductModelHistoryView(APIView):
+    def get(self, request):
+        history = ProductModelHistory.objects.filter(user=request.user)
+        serializer = ProductModelHistorySerializer(history, many=True)
+
+        return Response(serializer.data)
+

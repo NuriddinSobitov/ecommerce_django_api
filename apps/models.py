@@ -54,3 +54,13 @@ class Cart(Model):
     product = ForeignKey(Product, on_delete=CASCADE, related_name='carts')
     booker = ForeignKey(User, on_delete=CASCADE, related_name='carts')
     product_count = PositiveIntegerField(default=1)
+
+
+class ProductModelHistory(Model):
+    user = ForeignKey(User, on_delete=CASCADE)
+    product = ForeignKey(Product, on_delete=CASCADE)
+    viewed_at = DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-viewed_at',)
+
